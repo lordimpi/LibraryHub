@@ -1,4 +1,4 @@
-﻿using LibraryHub.Common.Exceptions;
+using LibraryHub.Common.Exceptions;
 
 namespace LibraryHub.WebAPI.Middleware;
 
@@ -8,14 +8,17 @@ namespace LibraryHub.WebAPI.Middleware;
 public class GlobalExceptionMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
     /// <summary>
     /// Inicializa una nueva instancia del middleware.
     /// </summary>
-    /// <param name="next">Delegado del siguiente middleware en la canalización.</param>
-    public GlobalExceptionMiddleware(RequestDelegate next)
+    /// <param name="next">Delegado del siguiente middleware en el pipeline.</param>
+    /// <param name="logger">Logger para registrar excepciones y contexto.</param>
+    public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     /// <summary>
@@ -24,24 +27,32 @@ public class GlobalExceptionMiddleware
     /// <param name="context">Contexto HTTP actual.</param>
     public async Task InvokeAsync(HttpContext context)
     {
-        try
+        var correlationId = context.Items[CorrelationIdMiddleware.CorrelationHeaderName]?.ToString() ?? "N/A";
+
+        using (_logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
-            await _next(context);
-        }
-        catch (AuthorNotFoundException ex)
-        {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
-        }
-        catch (MaxBooksExceededException ex)
-        {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
-        }
-        catch (Exception)
-        {
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await context.Response.WriteAsJsonAsync(new { message = "Internal Server Error" });
+            try
+            {
+                await _next(context);
+            }
+            catch (AuthorNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Author not found.");
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+            }
+            catch (MaxBooksExceededException ex)
+            {
+                _logger.LogWarning(ex, "Business rule exceeded: max books allowed.");
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception in request pipeline.");
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                await context.Response.WriteAsJsonAsync(new { message = "Internal Server Error" });
+            }
         }
     }
 }

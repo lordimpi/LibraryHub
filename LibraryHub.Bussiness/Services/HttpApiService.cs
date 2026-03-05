@@ -1,12 +1,12 @@
-﻿using System.Net.Http.Json;
-using LibraryHub.Web.Configurations;
-using LibraryHub.Web.Services.Contracts;
+using System.Net.Http.Json;
+using LibraryHub.Bussiness.Interfaces;
+using LibraryHub.Common.Configurations;
 using Microsoft.Extensions.Options;
 
-namespace LibraryHub.Web.Services.Implementations;
+namespace LibraryHub.Bussiness.Services;
 
 /// <summary>
-/// Implementa operaciones HTTP genéricas para consumo del backend desde MVC.
+/// Implementa operaciones HTTP genéricas para consumo de APIs.
 /// </summary>
 public class HttpApiService : IHttpApiService
 {
@@ -32,21 +32,30 @@ public class HttpApiService : IHttpApiService
     }
 
     /// <inheritdoc />
-    public async Task<TResponse?> PostAsync<TRequest, TResponse>(string url, TRequest payload, CancellationToken cancellationToken = default)
+    public async Task<TResponse?> PostAsync<TRequest, TResponse>(
+        string url,
+        TRequest payload,
+        CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PostAsJsonAsync(BuildUri(url), payload, cancellationToken);
         return await DeserializeResponse<TResponse>(response, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<TResponse?> PutAsync<TRequest, TResponse>(string url, TRequest payload, CancellationToken cancellationToken = default)
+    public async Task<TResponse?> PutAsync<TRequest, TResponse>(
+        string url,
+        TRequest payload,
+        CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PutAsJsonAsync(BuildUri(url), payload, cancellationToken);
         return await DeserializeResponse<TResponse>(response, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<TResponse?> PatchAsync<TRequest, TResponse>(string url, TRequest payload, CancellationToken cancellationToken = default)
+    public async Task<TResponse?> PatchAsync<TRequest, TResponse>(
+        string url,
+        TRequest payload,
+        CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PatchAsJsonAsync(BuildUri(url), payload, cancellationToken);
         return await DeserializeResponse<TResponse>(response, cancellationToken);
@@ -73,7 +82,9 @@ public class HttpApiService : IHttpApiService
         return $"{baseUrl}/{relativeUrl}";
     }
 
-    private static async Task<TResponse?> DeserializeResponse<TResponse>(HttpResponseMessage response, CancellationToken cancellationToken)
+    private static async Task<TResponse?> DeserializeResponse<TResponse>(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
     {
         response.EnsureSuccessStatusCode();
 

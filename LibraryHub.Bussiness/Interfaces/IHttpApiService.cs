@@ -1,7 +1,7 @@
-﻿namespace LibraryHub.Web.Services.Contracts;
+namespace LibraryHub.Bussiness.Interfaces;
 
 /// <summary>
-/// Define operaciones HTTP genéricas para consumo del backend desde MVC.
+/// Define operaciones HTTP genéricas para consumo de APIs externas o internas.
 /// </summary>
 public interface IHttpApiService
 {
@@ -23,7 +23,10 @@ public interface IHttpApiService
     /// <param name="payload">Cuerpo de la solicitud.</param>
     /// <param name="cancellationToken">Token de cancelación.</param>
     /// <returns>Respuesta deserializada.</returns>
-    Task<TResponse?> PostAsync<TRequest, TResponse>(string url, TRequest payload, CancellationToken cancellationToken = default);
+    Task<TResponse?> PostAsync<TRequest, TResponse>(
+        string url,
+        TRequest payload,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Ejecuta una petición PUT y deserializa la respuesta.
@@ -34,7 +37,10 @@ public interface IHttpApiService
     /// <param name="payload">Cuerpo de la solicitud.</param>
     /// <param name="cancellationToken">Token de cancelación.</param>
     /// <returns>Respuesta deserializada.</returns>
-    Task<TResponse?> PutAsync<TRequest, TResponse>(string url, TRequest payload, CancellationToken cancellationToken = default);
+    Task<TResponse?> PutAsync<TRequest, TResponse>(
+        string url,
+        TRequest payload,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Ejecuta una petición PATCH y deserializa la respuesta.
@@ -45,7 +51,10 @@ public interface IHttpApiService
     /// <param name="payload">Cuerpo de la solicitud.</param>
     /// <param name="cancellationToken">Token de cancelación.</param>
     /// <returns>Respuesta deserializada.</returns>
-    Task<TResponse?> PatchAsync<TRequest, TResponse>(string url, TRequest payload, CancellationToken cancellationToken = default);
+    Task<TResponse?> PatchAsync<TRequest, TResponse>(
+        string url,
+        TRequest payload,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Ejecuta una petición DELETE y deserializa la respuesta.
