@@ -47,6 +47,12 @@ public class GlobalExceptionMiddleware
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await context.Response.WriteAsJsonAsync(new { message = ex.Message });
             }
+            catch (BookNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Book not found.");
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unhandled exception in request pipeline.");

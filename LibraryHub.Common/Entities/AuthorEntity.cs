@@ -1,4 +1,4 @@
-﻿namespace LibraryHub.Common.Entities;
+namespace LibraryHub.Common.Entities;
 
 /// <summary>
 /// Representa un autor dentro del dominio de LibraryHub.
@@ -6,7 +6,7 @@
 public class AuthorEntity
 {
     /// <summary>
-    /// Obtiene o establece el identificador único del autor.
+    /// Obtiene o establece el identificador unico del autor.
     /// </summary>
     public int Id { get; set; }
 
@@ -26,7 +26,17 @@ public class AuthorEntity
     public string City { get; set; } = string.Empty;
 
     /// <summary>
-    /// Obtiene o establece el correo electrónico del autor.
+    /// Obtiene o establece el correo electronico del autor.
     /// </summary>
     public string Email { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Obtiene o establece un valor que indica si el autor fue eliminado logicamente.
+    /// </summary>
+    public bool IsDeleted { get; set; }
+
+    /// <summary>
+    /// Obtiene o establece la fecha UTC en la que el autor fue eliminado logicamente.
+    /// </summary>
+    public DateTime? DeletedAtUtc { get; set; }
 }

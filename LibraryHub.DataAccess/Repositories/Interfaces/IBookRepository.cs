@@ -16,6 +16,29 @@ public interface IBookRepository
     Task AddAsync(BookEntity book, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Obtiene la cantidad total de libros registrados.
+    /// </summary>
+    /// <param name="cancellationToken">Token de cancelacion.</param>
+    /// <returns>Total de libros.</returns>
+    Task<int> CountAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Obtiene un libro por su identificador.
+    /// </summary>
+    /// <param name="bookId">Identificador del libro.</param>
+    /// <param name="cancellationToken">Token de cancelacion.</param>
+    /// <returns>Entidad del libro o <c>null</c> si no existe.</returns>
+    Task<BookEntity?> GetByIdAsync(int bookId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Obtiene los libros activos de un autor.
+    /// </summary>
+    /// <param name="authorId">Identificador del autor.</param>
+    /// <param name="cancellationToken">Token de cancelacion.</param>
+    /// <returns>Coleccion de libros del autor.</returns>
+    Task<IReadOnlyCollection<BookEntity>> GetByAuthorIdAsync(int authorId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Obtiene todos los libros almacenados.
     /// </summary>
     /// <param name="cancellationToken">Token de cancelacion.</param>

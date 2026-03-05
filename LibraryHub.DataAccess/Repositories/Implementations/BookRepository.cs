@@ -34,6 +34,30 @@ public class BookRepository : IBookRepository
     }
 
     /// <inheritdoc />
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Books.CountAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<BookEntity?> GetByIdAsync(int bookId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Books
+            .Include(book => book.Author)
+            .FirstOrDefaultAsync(book => book.Id == bookId, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyCollection<BookEntity>> GetByAuthorIdAsync(
+        int authorId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Books
+            .Where(book => book.AuthorId == authorId)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<BookEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbContext.Books

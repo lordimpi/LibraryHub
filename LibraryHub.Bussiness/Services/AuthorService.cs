@@ -1,5 +1,7 @@
 using LibraryHub.Bussiness.Interfaces;
 using LibraryHub.Common.DTOs;
+using LibraryHub.Common.Entities;
+using LibraryHub.Common.Exceptions;
 using LibraryHub.Common.Pagination;
 using LibraryHub.Common.Responses;
 using LibraryHub.DataAccess.UnitOfWork;
@@ -24,10 +26,80 @@ public class AuthorService : IAuthorService
     }
 
     /// <inheritdoc />
-    /// <exception cref="NotImplementedException">Se lanza cuando la logica de creacion aun no esta implementada.</exception>
-    public Task<AuthorDto> CreateAsync(CreateAuthorDto author, CancellationToken cancellationToken = default)
+    public async Task<AuthorDto> CreateAsync(CreateAuthorDto author, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException("Author creation business logic is not implemented yet.");
+        var authorEntity = author.Adapt<AuthorEntity>();
+        await _unitOfWork.Authors.AddAsync(authorEntity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return authorEntity.Adapt<AuthorDto>();
+    }
+
+    /// <inheritdoc />
+    public async Task<AuthorDto> GetByIdAsync(int authorId, CancellationToken cancellationToken = default)
+    {
+        var author = await _unitOfWork.Authors.GetByIdAsync(authorId, cancellationToken);
+        if (author is null)
+        {
+            throw new AuthorNotFoundException("El autor no está registrado");
+        }
+
+        return author.Adapt<AuthorDto>();
+    }
+
+    /// <inheritdoc />
+    public async Task<AuthorDto> UpdateAsync(
+        int authorId,
+        UpdateAuthorDto author,
+        CancellationToken cancellationToken = default)
+    {
+        var authorEntity = await _unitOfWork.Authors.GetByIdAsync(authorId, cancellationToken);
+        if (authorEntity is null)
+        {
+            throw new AuthorNotFoundException("El autor no está registrado");
+        }
+
+        authorEntity.FullName = author.FullName;
+        authorEntity.BirthDate = author.BirthDate;
+        authorEntity.City = author.City;
+        authorEntity.Email = author.Email;
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return authorEntity.Adapt<AuthorDto>();
+    }
+
+    /// <inheritdoc />
+    public async Task SoftDeleteAsync(int authorId, CancellationToken cancellationToken = default)
+    {
+        await _unitOfWork.BeginTransactionAsync();
+
+        try
+        {
+            var author = await _unitOfWork.Authors.GetByIdAsync(authorId, cancellationToken);
+            if (author is null)
+            {
+                throw new AuthorNotFoundException("El autor no está registrado");
+            }
+
+            var deletedAtUtc = DateTime.UtcNow;
+            author.IsDeleted = true;
+            author.DeletedAtUtc = deletedAtUtc;
+
+            var authorBooks = await _unitOfWork.Books.GetByAuthorIdAsync(authorId, cancellationToken);
+            foreach (var book in authorBooks)
+            {
+                book.IsDeleted = true;
+                book.DeletedAtUtc = deletedAtUtc;
+            }
+
+            await _unitOfWork.CommitAsync();
+        }
+        catch
+        {
+            await _unitOfWork.RollbackAsync();
+            throw;
+        }
     }
 
     /// <inheritdoc />

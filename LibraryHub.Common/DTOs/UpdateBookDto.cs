@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace LibraryHub.Common.DTOs;
 
 /// <summary>
-/// Define los datos requeridos para crear un libro.
+/// Define los datos requeridos para actualizar un libro.
 /// </summary>
-public class CreateBookDto
+public class UpdateBookDto
 {
     /// <summary>
     /// Obtiene o establece el titulo del libro.

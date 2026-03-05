@@ -32,6 +32,9 @@ public static class MapsterConfig
         TypeAdapterConfig<CreateAuthorDto, AuthorEntity>
             .NewConfig();
 
+        TypeAdapterConfig<UpdateAuthorDto, AuthorEntity>
+            .NewConfig();
+
         TypeAdapterConfig<AuthorEntity, AuthorDto>
             .NewConfig();
     }
@@ -39,6 +42,9 @@ public static class MapsterConfig
     private static void ConfigureBookMappings()
     {
         TypeAdapterConfig<CreateBookDto, BookEntity>
+            .NewConfig();
+
+        TypeAdapterConfig<UpdateBookDto, BookEntity>
             .NewConfig();
 
         TypeAdapterConfig<BookEntity, BookDto>

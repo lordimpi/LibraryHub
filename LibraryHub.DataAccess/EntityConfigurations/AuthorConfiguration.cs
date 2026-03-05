@@ -1,4 +1,4 @@
-﻿using LibraryHub.Common.Entities;
+using LibraryHub.Common.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,7 +12,7 @@ public class AuthorConfiguration : IEntityTypeConfiguration<AuthorEntity>
     /// <summary>
     /// Configura el esquema de persistencia para la entidad de autor.
     /// </summary>
-    /// <param name="builder">Constructor de configuración de la entidad.</param>
+    /// <param name="builder">Constructor de configuracion de la entidad.</param>
     public void Configure(EntityTypeBuilder<AuthorEntity> builder)
     {
         builder.ToTable("Authors");
@@ -30,5 +30,8 @@ public class AuthorConfiguration : IEntityTypeConfiguration<AuthorEntity>
         builder.Property(author => author.Email)
             .IsRequired()
             .HasMaxLength(200);
+
+        builder.Property(author => author.IsDeleted)
+            .HasDefaultValue(false);
     }
 }

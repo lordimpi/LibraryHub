@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace LibraryHub.Common.DTOs;
 
 /// <summary>
-/// Define los datos requeridos para crear un autor.
+/// Define los datos requeridos para actualizar un autor.
 /// </summary>
-public class CreateAuthorDto
+public class UpdateAuthorDto
 {
     /// <summary>
     /// Obtiene o establece el nombre completo del autor.
