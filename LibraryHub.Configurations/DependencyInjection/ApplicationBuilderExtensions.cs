@@ -7,13 +7,13 @@ using Microsoft.Extensions.Logging;
 namespace LibraryHub.Configurations.DependencyInjection;
 
 /// <summary>
-/// Contiene extensiones para inicializacion de infraestructura al arrancar la aplicacion.
+/// Contiene extensiones para inicializar infraestructura al arrancar la aplicacion.
 /// </summary>
 public static class ApplicationBuilderExtensions
 {
     /// <summary>
-    /// Inicializa la base de datos de LibraryHub en modo desarrollo:
-    /// aplica migraciones si existen y ejecuta el seeder si la base esta vacia.
+    /// Inicializa la base de datos de LibraryHub en modo desarrollo.
+    /// Aplica migraciones, crea/actualiza procedimientos almacenados y ejecuta seeding.
     /// </summary>
     /// <param name="serviceProvider">Proveedor de servicios de la aplicacion.</param>
     /// <param name="isDevelopment">Indica si el entorno actual es desarrollo.</param>
@@ -35,7 +35,6 @@ public static class ApplicationBuilderExtensions
         logger.LogInformation("Database initialization in development mode started.");
 
         var hasMigrations = context.Database.GetMigrations().Any();
-
         if (hasMigrations)
         {
             logger.LogInformation("Migrations detected. Applying pending migrations.");
@@ -47,6 +46,7 @@ public static class ApplicationBuilderExtensions
             await context.Database.EnsureCreatedAsync();
         }
 
+        await StoredProceduresInitializer.EnsureCreatedAsync(context, logger);
         await DbInitializer.SeedAsync(context, logger);
 
         logger.LogInformation("Database initialization in development mode finished.");

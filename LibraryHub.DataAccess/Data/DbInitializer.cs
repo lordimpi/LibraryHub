@@ -18,8 +18,6 @@ public static class DbInitializer
     /// <param name="logger">Logger opcional para registrar el estado del seeding.</param>
     public static async Task SeedAsync(LibraryHubDbContext context, ILogger? logger = null)
     {
-        await context.Database.EnsureCreatedAsync();
-
         logger?.LogInformation("Seed started for LibraryHub.");
 
         var authorSeeds = new List<AuthorEntity>

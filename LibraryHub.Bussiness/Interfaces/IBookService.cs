@@ -1,4 +1,6 @@
-﻿using LibraryHub.Common.DTOs;
+using LibraryHub.Common.DTOs;
+using LibraryHub.Common.Pagination;
+using LibraryHub.Common.Responses;
 
 namespace LibraryHub.Bussiness.Interfaces;
 
@@ -21,4 +23,12 @@ public interface IBookService
     /// <param name="cancellationToken">Token de cancelación.</param>
     /// <returns>Colección de libros.</returns>
     Task<IReadOnlyCollection<BookDto>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Obtiene libros paginados según la fuente configurada.
+    /// </summary>
+    /// <param name="request">Parámetros de paginación solicitados.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Respuesta paginada de libros.</returns>
+    Task<PagedResponse<BookDto>> GetPagedAsync(PaginationRequest request, CancellationToken cancellationToken = default);
 }

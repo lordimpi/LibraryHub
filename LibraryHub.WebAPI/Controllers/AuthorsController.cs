@@ -1,5 +1,7 @@
-﻿using LibraryHub.Bussiness.Interfaces;
+using LibraryHub.Bussiness.Interfaces;
 using LibraryHub.Common.DTOs;
+using LibraryHub.Common.Pagination;
+using LibraryHub.Common.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryHub.WebAPI.Controllers;
@@ -44,6 +46,21 @@ public class AuthorsController : ControllerBase
     public async Task<ActionResult<IReadOnlyCollection<AuthorDto>>> GetAll(CancellationToken cancellationToken)
     {
         var result = await _authorService.GetAllAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Obtiene autores paginados desde EF Core o SP según el origen solicitado.
+    /// </summary>
+    /// <param name="request">Parámetros de paginación y origen.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Respuesta paginada de autores.</returns>
+    [HttpGet("paged")]
+    public async Task<ActionResult<PagedResponse<AuthorDto>>> GetPaged(
+        [FromQuery] PaginationRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _authorService.GetPagedAsync(request, cancellationToken);
         return Ok(result);
     }
 }

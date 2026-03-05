@@ -1,4 +1,5 @@
-﻿using LibraryHub.Common.Entities;
+using LibraryHub.Common.Entities;
+using LibraryHub.Common.Pagination;
 
 namespace LibraryHub.DataAccess.Repositories.Interfaces;
 
@@ -11,13 +12,41 @@ public interface IAuthorRepository
     /// Agrega un autor al contexto actual.
     /// </summary>
     /// <param name="author">Entidad de autor a agregar.</param>
-    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <param name="cancellationToken">Token de cancelacion.</param>
     Task AddAsync(AuthorEntity author, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Obtiene todos los autores almacenados.
     /// </summary>
-    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <param name="cancellationToken">Token de cancelacion.</param>
     /// <returns>Lista de autores.</returns>
     Task<IReadOnlyCollection<AuthorEntity>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Obtiene autores paginados utilizando EF Core.
+    /// </summary>
+    /// <param name="pageNumber">Numero de pagina.</param>
+    /// <param name="pageSize">Tamano de pagina.</param>
+    /// <param name="searchTerm">Termino opcional de busqueda.</param>
+    /// <param name="cancellationToken">Token de cancelacion.</param>
+    /// <returns>Resultado paginado con total de registros.</returns>
+    Task<PagedQueryResult<AuthorEntity>> GetPagedEfAsync(
+        int pageNumber,
+        int pageSize,
+        string? searchTerm,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Obtiene autores paginados mediante procedimiento almacenado.
+    /// </summary>
+    /// <param name="pageNumber">Numero de pagina.</param>
+    /// <param name="pageSize">Tamano de pagina.</param>
+    /// <param name="searchTerm">Termino opcional de busqueda.</param>
+    /// <param name="cancellationToken">Token de cancelacion.</param>
+    /// <returns>Resultado paginado con total de registros.</returns>
+    Task<PagedQueryResult<AuthorEntity>> GetPagedSpAsync(
+        int pageNumber,
+        int pageSize,
+        string? searchTerm,
+        CancellationToken cancellationToken = default);
 }
