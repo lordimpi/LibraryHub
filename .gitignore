@@ -416,3 +416,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Repository instructions file generated for local contributors/agents
+AGENTS.md
+
+# Local .NET CLI home/cache generated for sandboxed builds
+.dotnet/
