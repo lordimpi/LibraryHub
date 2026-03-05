@@ -1,4 +1,4 @@
-﻿using LibraryHub.Common.Entities;
+using LibraryHub.Common.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryHub.DataAccess.Context;
@@ -11,7 +11,7 @@ public class LibraryHubDbContext : DbContext
     /// <summary>
     /// Inicializa una nueva instancia del contexto de LibraryHub.
     /// </summary>
-    /// <param name="options">Opciones de configuración del contexto.</param>
+    /// <param name="options">Opciones de configuracion del contexto.</param>
     public LibraryHubDbContext(DbContextOptions<LibraryHubDbContext> options) : base(options)
     {
     }
@@ -33,6 +33,13 @@ public class LibraryHubDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LibraryHubDbContext).Assembly);
+
+        modelBuilder.Entity<AuthorEntity>()
+            .HasQueryFilter(author => !author.IsDeleted);
+
+        modelBuilder.Entity<BookEntity>()
+            .HasQueryFilter(book => !book.IsDeleted);
     }
 }

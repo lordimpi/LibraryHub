@@ -16,6 +16,22 @@ public interface IAuthorRepository
     Task AddAsync(AuthorEntity author, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Verifica si existe un autor con el identificador indicado.
+    /// </summary>
+    /// <param name="authorId">Identificador del autor.</param>
+    /// <param name="cancellationToken">Token de cancelacion.</param>
+    /// <returns><c>true</c> si el autor existe; en caso contrario, <c>false</c>.</returns>
+    Task<bool> ExistsByIdAsync(int authorId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Obtiene un autor por su identificador.
+    /// </summary>
+    /// <param name="authorId">Identificador del autor.</param>
+    /// <param name="cancellationToken">Token de cancelacion.</param>
+    /// <returns>Entidad del autor o <c>null</c> si no existe.</returns>
+    Task<AuthorEntity?> GetByIdAsync(int authorId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Obtiene todos los autores almacenados.
     /// </summary>
     /// <param name="cancellationToken">Token de cancelacion.</param>

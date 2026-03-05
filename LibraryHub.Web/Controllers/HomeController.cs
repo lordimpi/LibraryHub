@@ -10,12 +10,34 @@ namespace LibraryHub.Web.Controllers;
 public class HomeController : Controller
 {
     /// <summary>
-    /// Muestra la vista principal.
+    /// Redirige al módulo principal del dashboard SPA.
     /// </summary>
-    /// <returns>Vista de inicio.</returns>
+    /// <returns>Redirección a la ruta de autores.</returns>
     public IActionResult Index()
     {
-        return View();
+        return RedirectPermanent("/LibraryHub/authors");
+    }
+
+    /// <summary>
+    /// Hospeda la interfaz SPA-like de LibraryHub.
+    /// </summary>
+    /// <returns>Vista principal del dashboard.</returns>
+    [HttpGet]
+    [Route("LibraryHub/{*path}")]
+    [Route("LibaryHub/{*path}")]
+    public IActionResult LibraryHub()
+    {
+        if (Request.Path.StartsWithSegments("/LibaryHub", StringComparison.OrdinalIgnoreCase))
+        {
+            var correctedPath = Request.Path.Value?
+                .Replace("/LibaryHub", "/LibraryHub", StringComparison.OrdinalIgnoreCase)
+                ?? "/LibraryHub/authors";
+
+            return RedirectPermanent($"{correctedPath}{Request.QueryString}");
+        }
+
+        ViewData["Title"] = "LibraryHub Dashboard";
+        return View("Index");
     }
 
     /// <summary>

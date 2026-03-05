@@ -18,13 +18,46 @@ public static class StoredProceduresInitializer
     {
         logger?.LogInformation("Stored procedures initialization started.");
 
-        await context.Database.ExecuteSqlRawAsync(GetAuthorsPagedProcedureScript());
-        await context.Database.ExecuteSqlRawAsync(GetBooksPagedProcedureScript());
+        var hasAuthorSoftDelete = await HasColumnAsync(context, "Authors", "IsDeleted");
+        var hasBookSoftDelete = await HasColumnAsync(context, "Books", "IsDeleted");
 
-        logger?.LogInformation("Stored procedures initialization finished.");
+        var authorScript = hasAuthorSoftDelete
+            ? GetAuthorsPagedProcedureScriptWithSoftDelete()
+            : GetAuthorsPagedProcedureScriptLegacy();
+
+        var bookScript = hasAuthorSoftDelete && hasBookSoftDelete
+            ? GetBooksPagedProcedureScriptWithSoftDelete()
+            : GetBooksPagedProcedureScriptLegacy();
+
+        await context.Database.ExecuteSqlRawAsync(authorScript);
+        await context.Database.ExecuteSqlRawAsync(bookScript);
+
+        logger?.LogInformation(
+            "Stored procedures initialization finished. AuthorsSoftDelete: {AuthorsSoftDelete}, BooksSoftDelete: {BooksSoftDelete}",
+            hasAuthorSoftDelete,
+            hasBookSoftDelete);
     }
 
-    private static string GetAuthorsPagedProcedureScript()
+    private static async Task<bool> HasColumnAsync(LibraryHubDbContext context, string tableName, string columnName)
+    {
+        var result = await context.Database.SqlQuery<int>(
+            $"""
+            SELECT CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_SCHEMA = 'dbo'
+                      AND TABLE_NAME = {tableName}
+                      AND COLUMN_NAME = {columnName}
+                ) THEN 1
+                ELSE 0
+            END AS [Value]
+            """).SingleAsync();
+
+        return result == 1;
+    }
+
+    private static string GetAuthorsPagedProcedureScriptLegacy()
     {
         return
             """
@@ -63,7 +96,49 @@ public static class StoredProceduresInitializer
             """;
     }
 
-    private static string GetBooksPagedProcedureScript()
+    private static string GetAuthorsPagedProcedureScriptWithSoftDelete()
+    {
+        return
+            """
+            CREATE OR ALTER PROCEDURE dbo.sp_Authors_GetPaged
+                @PageNumber INT,
+                @PageSize INT,
+                @SearchTerm NVARCHAR(200) = NULL
+            AS
+            BEGIN
+                SET NOCOUNT ON;
+
+                DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+                DECLARE @NormalizedSearch NVARCHAR(200) = NULL;
+
+                IF @SearchTerm IS NOT NULL AND LTRIM(RTRIM(@SearchTerm)) <> ''
+                BEGIN
+                    SET @NormalizedSearch = LOWER(LTRIM(RTRIM(@SearchTerm)));
+                END
+
+                SELECT
+                    A.Id,
+                    A.FullName,
+                    A.BirthDate,
+                    A.City,
+                    A.Email,
+                    COUNT(1) OVER() AS TotalCount
+                FROM dbo.Authors AS A
+                WHERE A.IsDeleted = 0
+                    AND (
+                        @NormalizedSearch IS NULL
+                        OR LOWER(A.FullName) LIKE '%' + @NormalizedSearch + '%'
+                        OR LOWER(A.City) LIKE '%' + @NormalizedSearch + '%'
+                        OR LOWER(A.Email) LIKE '%' + @NormalizedSearch + '%'
+                    )
+                ORDER BY A.Id
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY;
+            END;
+            """;
+    }
+
+    private static string GetBooksPagedProcedureScriptLegacy()
     {
         return
             """
@@ -99,6 +174,53 @@ public static class StoredProceduresInitializer
                     OR LOWER(B.Title) LIKE '%' + @NormalizedSearch + '%'
                     OR LOWER(B.Genre) LIKE '%' + @NormalizedSearch + '%'
                     OR LOWER(A.FullName) LIKE '%' + @NormalizedSearch + '%'
+                ORDER BY B.Id
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY;
+            END;
+            """;
+    }
+
+    private static string GetBooksPagedProcedureScriptWithSoftDelete()
+    {
+        return
+            """
+            CREATE OR ALTER PROCEDURE dbo.sp_Books_GetPaged
+                @PageNumber INT,
+                @PageSize INT,
+                @SearchTerm NVARCHAR(200) = NULL
+            AS
+            BEGIN
+                SET NOCOUNT ON;
+
+                DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+                DECLARE @NormalizedSearch NVARCHAR(200) = NULL;
+
+                IF @SearchTerm IS NOT NULL AND LTRIM(RTRIM(@SearchTerm)) <> ''
+                BEGIN
+                    SET @NormalizedSearch = LOWER(LTRIM(RTRIM(@SearchTerm)));
+                END
+
+                SELECT
+                    B.Id,
+                    B.Title,
+                    B.[Year],
+                    B.Genre,
+                    B.Pages,
+                    B.AuthorId,
+                    A.FullName AS AuthorFullName,
+                    COUNT(1) OVER() AS TotalCount
+                FROM dbo.Books AS B
+                INNER JOIN dbo.Authors AS A
+                    ON A.Id = B.AuthorId
+                WHERE B.IsDeleted = 0
+                    AND A.IsDeleted = 0
+                    AND (
+                        @NormalizedSearch IS NULL
+                        OR LOWER(B.Title) LIKE '%' + @NormalizedSearch + '%'
+                        OR LOWER(B.Genre) LIKE '%' + @NormalizedSearch + '%'
+                        OR LOWER(A.FullName) LIKE '%' + @NormalizedSearch + '%'
+                    )
                 ORDER BY B.Id
                 OFFSET @Offset ROWS
                 FETCH NEXT @PageSize ROWS ONLY;

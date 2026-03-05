@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11520.95 d18.3
+VisualStudioVersion = 18.3.11520.95
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryHub.WebAPI", "LibraryHub.WebAPI\LibraryHub.WebAPI.csproj", "{E2F269E2-4643-40C3-8781-E088B0D6C4C6}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryHub.Configurations", "LibraryHub.Configurations\LibraryHub.Configurations.csproj", "{CA493711-5577-4105-AF6F-43D3C7B028E3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryHub.Web", "LibraryHub.Web\LibraryHub.Web.csproj", "{B4E3AC98-DAEB-498B-A224-F1C6D4EF9334}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryHub.WebAPI.Tests", "LibraryHub.WebAPI.Tests\LibraryHub.WebAPI.Tests.csproj", "{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +99,18 @@ Global
 		{B4E3AC98-DAEB-498B-A224-F1C6D4EF9334}.Release|x64.Build.0 = Release|Any CPU
 		{B4E3AC98-DAEB-498B-A224-F1C6D4EF9334}.Release|x86.ActiveCfg = Release|Any CPU
 		{B4E3AC98-DAEB-498B-A224-F1C6D4EF9334}.Release|x86.Build.0 = Release|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Debug|x64.Build.0 = Debug|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Debug|x86.Build.0 = Debug|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Release|x64.ActiveCfg = Release|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Release|x64.Build.0 = Release|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Release|x86.ActiveCfg = Release|Any CPU
+		{0DCCE4A1-F54C-42CA-8A56-18EF03ED3EFC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

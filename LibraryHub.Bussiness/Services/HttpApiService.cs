@@ -86,7 +86,15 @@ public class HttpApiService : IHttpApiService
         HttpResponseMessage response,
         CancellationToken cancellationToken)
     {
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            var errorMessage = string.IsNullOrWhiteSpace(errorBody)
+                ? $"Backend request failed with status code {(int)response.StatusCode}."
+                : errorBody;
+
+            throw new HttpRequestException(errorMessage, null, response.StatusCode);
+        }
 
         if (response.Content.Headers.ContentLength == 0)
         {

@@ -1,4 +1,4 @@
-﻿using LibraryHub.Common.Entities;
+using LibraryHub.Common.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,7 +12,7 @@ public class BookConfiguration : IEntityTypeConfiguration<BookEntity>
     /// <summary>
     /// Configura el esquema de persistencia para la entidad de libro.
     /// </summary>
-    /// <param name="builder">Constructor de configuración de la entidad.</param>
+    /// <param name="builder">Constructor de configuracion de la entidad.</param>
     public void Configure(EntityTypeBuilder<BookEntity> builder)
     {
         builder.ToTable("Books");
@@ -26,6 +26,9 @@ public class BookConfiguration : IEntityTypeConfiguration<BookEntity>
         builder.Property(book => book.Genre)
             .IsRequired()
             .HasMaxLength(100);
+
+        builder.Property(book => book.IsDeleted)
+            .HasDefaultValue(false);
 
         builder.HasOne(book => book.Author)
             .WithMany()

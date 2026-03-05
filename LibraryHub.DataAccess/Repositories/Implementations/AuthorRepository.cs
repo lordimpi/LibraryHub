@@ -34,6 +34,21 @@ public class AuthorRepository : IAuthorRepository
     }
 
     /// <inheritdoc />
+    public async Task<bool> ExistsByIdAsync(int authorId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Authors
+            .AsNoTracking()
+            .AnyAsync(author => author.Id == authorId, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<AuthorEntity?> GetByIdAsync(int authorId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Authors
+            .FirstOrDefaultAsync(author => author.Id == authorId, cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<AuthorEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbContext.Authors
