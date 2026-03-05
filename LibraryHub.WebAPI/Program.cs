@@ -68,3 +68,8 @@ app.MapGet("/", () => Results.Redirect("/scalar/v1"))
    .ExcludeFromDescription();
 
 app.Run();
+
+/// <summary>
+/// Expone el punto de entrada para pruebas de integracion.
+/// </summary>
+public partial class Program;
