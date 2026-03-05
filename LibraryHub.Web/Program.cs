@@ -1,6 +1,6 @@
-﻿using LibraryHub.Web.Configurations;
-using LibraryHub.Web.Services.Contracts;
-using LibraryHub.Web.Services.Implementations;
+using LibraryHub.Bussiness.Interfaces;
+using LibraryHub.Bussiness.Services;
+using LibraryHub.Common.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -34,6 +34,7 @@ public static class ServiceCollectionExtensions
         services.AddOptions();
         services.BindOptions<BusinessRulesOptions>(config, "BusinessRules");
         services.BindOptions<DbOptions>(config, "ConnectionStrings", validateDataAnnotations: false, validateOnStart: false);
+        services.BindOptions<ApiClientOptions>(config, "ApiClient", validateDataAnnotations: false, validateOnStart: false);
         services.AddScoped(typeof(IGenericOptionsService<>), typeof(GenericOptionsService<>));
 
         return services;
@@ -82,6 +83,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IAuthorService, AuthorService>();
         services.AddScoped<IBookService, BookService>();
+        services.AddHttpClient<IHttpApiService, HttpApiService>();
 
         // Registro transient para demostrar el patrón de lifetimes.
         services.AddTransient<IClock, SystemClock>();

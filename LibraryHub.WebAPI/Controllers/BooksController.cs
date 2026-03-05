@@ -1,5 +1,7 @@
-﻿using LibraryHub.Bussiness.Interfaces;
+using LibraryHub.Bussiness.Interfaces;
 using LibraryHub.Common.DTOs;
+using LibraryHub.Common.Pagination;
+using LibraryHub.Common.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryHub.WebAPI.Controllers;
@@ -44,6 +46,21 @@ public class BooksController : ControllerBase
     public async Task<ActionResult<IReadOnlyCollection<BookDto>>> GetAll(CancellationToken cancellationToken)
     {
         var result = await _bookService.GetAllAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Obtiene libros paginados desde EF Core o SP según el origen solicitado.
+    /// </summary>
+    /// <param name="request">Parámetros de paginación y origen.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Respuesta paginada de libros.</returns>
+    [HttpGet("paged")]
+    public async Task<ActionResult<PagedResponse<BookDto>>> GetPaged(
+        [FromQuery] PaginationRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _bookService.GetPagedAsync(request, cancellationToken);
         return Ok(result);
     }
 }
