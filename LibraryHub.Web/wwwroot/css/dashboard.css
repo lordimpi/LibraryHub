@@ -56,6 +56,7 @@ html[data-bs-theme="dark"] body {
     font-size: clamp(1.8rem, 2.6vw, 2.45rem);
     font-weight: 700;
     letter-spacing: 0.01em;
+    margin-bottom: 0;
 }
 
 .sidebar-panel {
@@ -129,6 +130,25 @@ html[data-bs-theme="dark"] body {
 
 .content-panel {
     min-width: 0;
+}
+
+.sidebar-toggle-btn {
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--bs-body-color);
+}
+
+.sidebar-toggle-btn:hover,
+.sidebar-toggle-btn:focus-visible {
+    background: rgba(73, 172, 255, 0.14);
+    color: var(--bs-primary);
 }
 
 .datagrid-wrapper {
@@ -247,15 +267,74 @@ html[data-bs-theme="dark"] .dashboard-shell .btn-outline-secondary {
 }
 
 @media (min-width: 992px) {
+    .dashboard-shell .sidebar-panel {
+        flex: 0 0 260px !important;
+        max-width: 260px !important;
+        width: 260px !important;
+    }
+
+    .dashboard-shell .content-panel {
+        flex: 1 1 calc(100% - 260px) !important;
+        max-width: calc(100% - 260px) !important;
+        width: auto !important;
+    }
+
     .sidebar-panel {
         position: sticky;
         top: 0;
         align-self: flex-start;
     }
+
+    .dashboard-shell .sidebar-panel,
+    .dashboard-shell .content-panel {
+        transition: flex-basis 0.25s ease, max-width 0.25s ease, width 0.25s ease;
+    }
+
+    .dashboard-shell.sidebar-collapsed .sidebar-panel {
+        flex: 0 0 0 !important;
+        max-width: 0 !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        border-right: 0;
+        overflow: hidden;
+    }
+
+    .dashboard-shell.sidebar-collapsed .sidebar-panel > * {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .dashboard-shell.sidebar-collapsed .content-panel {
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+    }
 }
 
 @media (max-width: 991.98px) {
     .sidebar-panel {
-        min-height: auto;
+        min-height: 0;
+        height: auto;
+        max-height: 520px;
+        overflow: hidden;
+        opacity: 1;
+        transform: translateY(0);
+        transition: max-height 0.3s ease, opacity 0.2s ease, transform 0.3s ease, margin 0.3s ease;
+    }
+
+    .dashboard-shell .sidebar-panel > * {
+        transition: opacity 0.18s ease;
+    }
+
+    .dashboard-shell.sidebar-collapsed .sidebar-panel {
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-8px);
+        margin-bottom: 0;
+        border-right: 0;
+    }
+
+    .dashboard-shell.sidebar-collapsed .sidebar-panel > * {
+        opacity: 0;
+        pointer-events: none;
     }
 }

@@ -6,10 +6,12 @@
 
     const ROUTE_PREFIX = "/LibraryHub";
     const THEME_KEY = "libraryhub.theme.mode";
+    const SIDEBAR_KEY = "libraryhub.sidebar.collapsed";
 
     const modules = {
         authors: {
             label: "Autores",
+            singularLabel: "Autor",
             endpoint: "authors",
             columns: [
                 { key: "id", label: "Id", sortable: true, render: (item) => item.id ?? "-" },
@@ -29,6 +31,7 @@
         },
         books: {
             label: "Libros",
+            singularLabel: "Libro",
             endpoint: "books",
             columns: [
                 { key: "id", label: "Id", sortable: true, render: (item) => item.id ?? "-" },
@@ -53,6 +56,8 @@
     const dom = {
         moduleTitle: document.getElementById("moduleTitle"),
         activeModuleLabel: document.getElementById("activeModuleLabel"),
+        sidebarToggleButton: document.getElementById("sidebarToggleButton"),
+        sidebarToggleIcon: document.getElementById("sidebarToggleIcon"),
         themeToggleButton: document.getElementById("themeToggleButton"),
         themeModeLabel: document.getElementById("themeModeLabel"),
         searchInput: document.getElementById("searchInput"),
@@ -86,6 +91,7 @@
     const state = {
         module: "authors",
         theme: "auto",
+        sidebarCollapsed: false,
         debounceId: null,
         pendingDeleteId: null,
         authors: createModuleState(),
@@ -123,7 +129,9 @@
     function init() {
         parseRoute();
         state.theme = localStorage.getItem(THEME_KEY) ?? "auto";
+        state.sidebarCollapsed = localStorage.getItem(SIDEBAR_KEY) === "1";
         applyTheme();
+        applySidebarState();
         bindEvents();
         renderAll();
         loadCurrent({ syncUrl: true, replaceState: true });
@@ -234,11 +242,27 @@
             await submitEntity();
         });
 
+        dom.entityForm.addEventListener("input", (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement)) {
+                return;
+            }
+
+            const field = cfg().fields.find((entry) => entry.name === target.name);
+            if (!field) {
+                return;
+            }
+
+            const validationMessage = validateField(field, target.value);
+            setFieldError(field.name, validationMessage, target);
+        });
+
         dom.confirmDeleteButton.addEventListener("click", async () => {
             await confirmDelete();
         });
 
         dom.themeToggleButton.addEventListener("click", cycleThemeMode);
+        dom.sidebarToggleButton?.addEventListener("click", toggleSidebar);
 
         window.addEventListener("popstate", () => {
             parseRoute();
@@ -566,7 +590,7 @@
         const m = current();
         const editMode = m.mode === "edit";
 
-        dom.entityModalTitle.textContent = `${editMode ? "Editar" : "Crear"} ${cfg().label.slice(0, -1)}`;
+        dom.entityModalTitle.textContent = `${editMode ? "Editar" : "Crear"} ${cfg().singularLabel}`;
         dom.entityModalHint.textContent = editMode
             ? "Actualiza los campos y guarda para persistir cambios."
             : "Completa los campos para registrar un nuevo elemento.";
@@ -580,7 +604,8 @@
 
             return `<div class="col-12 col-md-6">
                 <label class="form-label" for="field-${field.name}">${escapeHtml(field.label)}</label>
-                <input id="field-${field.name}" name="${field.name}" class="form-control" type="${field.type}" value="${escapeHtml(String(value))}" ${required} ${maxLength} ${min} ${max} />
+                <input id="field-${field.name}" name="${field.name}" class="form-control" type="${field.type}" value="${escapeHtml(String(value))}" ${required} ${maxLength} ${min} ${max} aria-describedby="field-error-${field.name}" />
+                <div class="text-danger small mt-1 field-error" id="field-error-${field.name}" aria-live="polite"></div>
             </div>`;
         }).join("");
 
@@ -596,12 +621,13 @@
 
     async function submitEntity() {
         const values = Object.fromEntries(new FormData(dom.entityForm).entries());
-        const validationError = validateForm(cfg().fields, values);
-        if (validationError) {
-            dom.formErrors.textContent = validationError;
+        const validation = validateForm(cfg().fields, values);
+        if (!validation.isValid) {
+            applyFieldErrors(validation.fieldErrors);
             return;
         }
 
+        clearAllFieldErrors();
         const m = current();
         dom.saveButton.disabled = true;
         setButtonLoading(dom.saveButton, true, m.mode === "edit" ? "Actualizando..." : "Guardando...");
@@ -684,41 +710,98 @@
     }
 
     function validateForm(fields, values) {
+        const fieldErrors = {};
+
         for (const field of fields) {
-            const value = String(values[field.name] ?? "").trim();
+            const validationMessage = validateField(field, values[field.name]);
+            if (validationMessage) {
+                fieldErrors[field.name] = validationMessage;
+            }
+        }
 
-            if (field.required && !value) {
-                return `El campo ${field.label} es obligatorio.`;
+        return {
+            isValid: Object.keys(fieldErrors).length === 0,
+            fieldErrors,
+        };
+    }
+
+    function validateField(field, rawValue) {
+        const value = String(rawValue ?? "").trim();
+
+        if (field.required && !value) {
+            return `El campo ${field.label} es obligatorio.`;
+        }
+
+        if (field.maxLength && value.length > field.maxLength) {
+            return `El campo ${field.label} no puede superar ${field.maxLength} caracteres.`;
+        }
+
+        if (field.type === "email" && value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                return "El correo ingresado no tiene un formato valido.";
+            }
+        }
+
+        if (field.type === "number" && value) {
+            const numeric = Number(value);
+            if (!Number.isFinite(numeric)) {
+                return `El campo ${field.label} debe ser numerico.`;
             }
 
-            if (field.maxLength && value.length > field.maxLength) {
-                return `El campo ${field.label} no puede superar ${field.maxLength} caracteres.`;
+            if (Number.isFinite(field.min) && numeric < field.min) {
+                return `El campo ${field.label} debe ser mayor o igual a ${field.min}.`;
             }
 
-            if (field.type === "email" && value) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(value)) {
-                    return "El correo ingresado no tiene un formato valido.";
-                }
-            }
-
-            if (field.type === "number" && value) {
-                const numeric = Number(value);
-                if (!Number.isFinite(numeric)) {
-                    return `El campo ${field.label} debe ser numerico.`;
-                }
-
-                if (Number.isFinite(field.min) && numeric < field.min) {
-                    return `El campo ${field.label} debe ser mayor o igual a ${field.min}.`;
-                }
-
-                if (Number.isFinite(field.max) && numeric > field.max) {
-                    return `El campo ${field.label} debe ser menor o igual a ${field.max}.`;
-                }
+            if (Number.isFinite(field.max) && numeric > field.max) {
+                return `El campo ${field.label} debe ser menor o igual a ${field.max}.`;
             }
         }
 
         return "";
+    }
+
+    function applyFieldErrors(fieldErrors) {
+        const fields = cfg().fields;
+        fields.forEach((field) => {
+            const input = dom.entityForm.querySelector(`#field-${field.name}`);
+            if (!(input instanceof HTMLInputElement)) {
+                return;
+            }
+
+            const message = fieldErrors[field.name] ?? "";
+            setFieldError(field.name, message, input);
+        });
+    }
+
+    function setFieldError(fieldName, message, input) {
+        const errorContainer = document.getElementById(`field-error-${fieldName}`);
+        if (!errorContainer) {
+            return;
+        }
+
+        errorContainer.textContent = message;
+        const hasValue = String(input.value ?? "").trim().length > 0;
+        input.classList.toggle("is-invalid", Boolean(message));
+        input.classList.toggle("is-valid", !message && hasValue);
+    }
+
+    function clearAllFieldErrors() {
+        const fields = cfg().fields;
+        fields.forEach((field) => {
+            const input = dom.entityForm.querySelector(`#field-${field.name}`);
+            if (!(input instanceof HTMLInputElement)) {
+                return;
+            }
+
+            const errorContainer = document.getElementById(`field-error-${field.name}`);
+            if (errorContainer) {
+                errorContainer.textContent = "";
+            }
+
+            input.classList.remove("is-invalid");
+            input.classList.remove("is-valid");
+        });
     }
 
     async function apiFetch(url, options) {
@@ -834,6 +917,27 @@
         }
 
         return "Light";
+    }
+
+    function toggleSidebar() {
+        state.sidebarCollapsed = !state.sidebarCollapsed;
+        localStorage.setItem(SIDEBAR_KEY, state.sidebarCollapsed ? "1" : "0");
+        applySidebarState();
+    }
+
+    function applySidebarState() {
+        root.classList.toggle("sidebar-collapsed", state.sidebarCollapsed);
+
+        if (dom.sidebarToggleButton) {
+            const title = state.sidebarCollapsed ? "Mostrar menu lateral" : "Ocultar menu lateral";
+            dom.sidebarToggleButton.setAttribute("aria-expanded", String(!state.sidebarCollapsed));
+            dom.sidebarToggleButton.setAttribute("aria-label", title);
+            dom.sidebarToggleButton.setAttribute("title", title);
+        }
+
+        if (dom.sidebarToggleIcon) {
+            dom.sidebarToggleIcon.className = "bi bi-list fs-5";
+        }
     }
 
     function formatDate(raw) {
