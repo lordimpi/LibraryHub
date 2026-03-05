@@ -36,7 +36,9 @@ public class BookRepository : IBookRepository
     /// <inheritdoc />
     public async Task<int> CountAsync(CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Books.CountAsync(cancellationToken);
+        return await _dbContext.Books
+            .Where(book => !book.IsDeleted)
+            .CountAsync(cancellationToken);
     }
 
     /// <inheritdoc />

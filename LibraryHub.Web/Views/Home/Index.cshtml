@@ -1,8 +1,146 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "LibraryHub Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="dashboard-shell" id="dashboardApp" data-api-base="/dashboard-api">
+    <div class="container-fluid px-0">
+        <div class="row g-0 min-vh-100">
+            <aside class="col-12 col-lg-2 sidebar-panel">
+                <div class="sidebar-header">Library Hub</div>
+
+                <nav class="px-3 py-3" aria-label="Navegacion principal">
+                    <p class="sidebar-title">Dashboard</p>
+                    <ul class="nav flex-column gap-1">
+                        <li class="nav-item">
+                            <a href="/LibraryHub/authors" class="nav-link sidebar-link" data-route-link="authors">
+                                <i class="bi bi-people-fill me-2"></i>Autores
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/LibraryHub/books" class="nav-link sidebar-link" data-route-link="books">
+                                <i class="bi bi-journal-richtext me-2"></i>Libros
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="sidebar-footer px-3 pb-3 mt-auto d-grid gap-2">
+                    <button type="button" class="btn btn-outline-light btn-sm text-start" id="themeToggleButton">
+                        <i class="bi bi-circle-half me-2"></i>Tema: <strong id="themeModeLabel">Auto</strong>
+                    </button>
+                </div>
+            </aside>
+
+            <main class="col-12 col-lg-10 content-panel">
+                <div class="p-3 p-xl-4 d-grid gap-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <h1 class="mb-1 dashboard-title" id="moduleTitle">Autores</h1>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <span class="badge text-bg-primary-subtle border d-none" id="activeModuleLabel">Autores</span>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-12 col-md-6 col-xl-5">
+                                    <label for="searchInput" class="form-label mb-1">Buscar</label>
+                                    <input id="searchInput" class="form-control" type="search" placeholder="Buscar por nombre, correo, titulo o genero" autocomplete="off" />
+                                </div>
+                                <div class="col-6 col-md-3 col-xl-2">
+                                    <label for="sourceSelect" class="form-label mb-1">Fuente</label>
+                                    <select id="sourceSelect" class="form-select">
+                                        <option value="Ef">EF Core</option>
+                                        <option value="Sp">Stored Procedure</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-3 col-xl-2">
+                                    <label for="pageSizeSelect" class="form-label mb-1">Tamano</label>
+                                    <select id="pageSizeSelect" class="form-select">
+                                        <option value="5" selected>5</option>
+                                        <option value="10">10</option>
+                                        <option value="20">20</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-xl-3">
+                                    <div class="d-flex gap-2 justify-content-xl-end flex-wrap">
+                                        <button type="button" class="btn btn-outline-secondary" id="refreshButton"><i class="bi bi-arrow-clockwise me-1"></i>Actualizar</button>
+                                        <button type="button" class="btn btn-primary" id="newEntityButton"><i class="bi bi-plus-circle me-1"></i>Nuevo</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0 datagrid-card">
+                        <div class="card-body p-0" id="tableContainer"></div>
+                        <div class="card-footer bg-transparent border-0">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 datagrid-footer">
+                                <div class="small text-secondary" id="pagerMeta">Sin datos</div>
+                                <nav aria-label="Paginacion de resultados" class="datagrid-pagination">
+                                    <ul class="pagination pagination-sm mb-0 justify-content-end" id="paginationNav"></ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="modal fade" id="entityModal" tabindex="-1" aria-labelledby="entityModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="entityModalTitle">Crear registro</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-secondary mb-3" id="entityModalHint">Completa la informacion del registro.</p>
+                    <form id="entityForm" novalidate>
+                        <input type="hidden" id="entityId" />
+                        <div class="row g-3" id="formFields"></div>
+                        <div class="text-danger small mt-2" id="formErrors" aria-live="assertive"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="saveButton" form="entityForm">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="deleteModalTitle">Eliminar registro</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" id="deleteModalMessage">Confirma la eliminacion del registro seleccionado.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteButton"><i class="bi bi-trash3 me-1"></i>Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="dashboard-loading-overlay d-none" id="loadingOverlay" aria-live="polite" aria-busy="true">
+        <div class="dashboard-loading-box">
+            <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+            <p class="mb-0" id="loadingOverlayText">Procesando solicitud...</p>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}

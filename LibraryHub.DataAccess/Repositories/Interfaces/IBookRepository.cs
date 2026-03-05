@@ -16,10 +16,10 @@ public interface IBookRepository
     Task AddAsync(BookEntity book, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Obtiene la cantidad total de libros registrados.
+    /// Obtiene la cantidad total de libros activos (no eliminados logicamente).
     /// </summary>
     /// <param name="cancellationToken">Token de cancelacion.</param>
-    /// <returns>Total de libros.</returns>
+    /// <returns>Total de libros activos.</returns>
     Task<int> CountAsync(CancellationToken cancellationToken = default);
 
     /// <summary>

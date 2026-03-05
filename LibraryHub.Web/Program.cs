@@ -25,6 +25,18 @@ app.UseAuthorization();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
+    name: "libraryhub-spa",
+    pattern: "LibraryHub/{*path}",
+    defaults: new { controller = "Home", action = "LibraryHub" })
+    .WithStaticAssets();
+
+app.MapControllerRoute(
+    name: "libaryhub-spa-legacy",
+    pattern: "LibaryHub/{*path}",
+    defaults: new { controller = "Home", action = "LibraryHub" })
+    .WithStaticAssets();
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();

@@ -1,5 +1,6 @@
 using LibraryHub.Common.Configurations;
 using LibraryHub.Configurations.DependencyInjection;
+using LibraryHub.WebAPI.Filters;
 using LibraryHub.WebAPI.Logging;
 using LibraryHub.WebAPI.Middleware;
 using Scalar.AspNetCore;
@@ -14,7 +15,10 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<DomainExceptionFilter>();
+});
 builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddLibraryHub(builder.Configuration);
