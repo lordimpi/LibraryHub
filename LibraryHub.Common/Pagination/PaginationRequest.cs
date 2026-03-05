@@ -17,7 +17,7 @@ public class PaginationRequest
     /// Obtiene o establece la cantidad de elementos por pagina.
     /// </summary>
     [Range(1, 100)]
-    public int PageSize { get; set; } = 20;
+    public int PageSize { get; set; } = 5;
 
     /// <summary>
     /// Obtiene o establece la fuente de datos de paginacion.
