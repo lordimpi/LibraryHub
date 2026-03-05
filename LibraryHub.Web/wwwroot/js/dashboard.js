@@ -284,7 +284,7 @@
         const q = new URLSearchParams(window.location.search);
         const m = current();
         m.page = asPositiveInt(q.get("page"), 1);
-        m.size = asPositiveInt(q.get("pageSize"), 10);
+        m.size = asPositiveInt(q.get("pageSize"), 5);
         m.source = q.get("source") === "Sp" ? "Sp" : "Ef";
         m.search = (q.get("search") ?? "").trim();
         m.sort = q.get("sort") || "id";
